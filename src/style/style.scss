@@ -39,13 +39,13 @@ p {
 @font-face {
   font-family: "Pacifico-Regular";
   font-display: swap;
-  src: url("/font/Pacifico-Regular.ttf") format("truetype");
+  src: url("/font/Pacifico-Regular.woff2") format("woff2");
 }
 
 @font-face {
   font-family: "UnidreamLED";
   font-display: swap;
-  src: url("/font/UnidreamLED.ttf") format("truetype");
+  src: url("/font/UnidreamLED.woff2") format("woff2");
 }
 
 // 基础样式
@@ -67,9 +67,11 @@ p {
   transition:
     backdrop-filter 0.3s,
     transform 0.3s;
+
   &:hover {
     transform: scale(1.01);
   }
+
   &:active {
     transform: scale(0.98);
   }
@@ -94,6 +96,7 @@ p {
   .el-message__badge {
     display: none;
   }
+
   .el-message__content {
     white-space: nowrap;
   }
@@ -104,11 +107,13 @@ p {
   .el-progress-bar__outer {
     border-radius: 6px;
     background-color: #00000020;
+
     .el-progress-bar__inner {
       background-color: #efefef;
       border-radius: 6px;
       text-align: center;
       font-family: "UnidreamLED";
+
       span {
         color: #564d59;
         font-size: 0.9rem;
@@ -128,12 +133,14 @@ p {
   border-radius: 8px !important;
   border: 1px solid transparent !important;
   background-color: transparent !important;
+
   .el-card__header {
     font-weight: bold;
     padding: 16px 20px !important;
     background-color: #ffffff30 !important;
     border-bottom: 1px solid transparent !important;
   }
+
   .el-card__body {
     padding: 0 !important;
     background-color: #ffffff10 !important;
@@ -156,6 +163,7 @@ p {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -166,6 +174,7 @@ p {
     filter: blur(20px) brightness(0.3);
     transform: scale(1.6);
   }
+
   to {
     filter: blur(0) brightness(1);
     transform: scale(1);
@@ -176,6 +185,7 @@ p {
   from {
     transform: scale(1.2);
   }
+
   to {
     transform: scale(1);
   }

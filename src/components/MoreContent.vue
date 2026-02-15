@@ -1,5 +1,5 @@
 <template>
-  <div class="more-content">您可在此编写任意内容</div>
+  <div class="more-content">时间匆匆过去，要珍惜时间，珍惜自己~</div>
 </template>
 
 <style lang="scss" scoped>

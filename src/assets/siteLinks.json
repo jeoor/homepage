@@ -5,29 +5,24 @@
     "link": "https://blog.kayro.cn/"
   },
   {
-    "icon": "Cloud",
-    "name": "网盘",
-    "link": "https://pan.imsyy.top/"
+    "icon": "Tv",
+    "name": "电视厅",
+    "link": "https://tv.kayro.cn/"
   },
   {
     "icon": "CompactDisc",
     "name": "音乐",
-    "link": "https://music.imsyy.top/"
+    "link": "https://blog.kayro.cn/music/"
+  },
+  {
+    "icon": "Images",
+    "name": "相册",
+    "link": "https://blog.kayro.cn/gallery/"
   },
   {
     "icon": "Compass",
-    "name": "起始页",
-    "link": "https://nav.imsyy.top/"
-  },
-  {
-    "icon": "Book",
-    "name": "网址集",
-    "link": "https://web.imsyy.top/"
-  },
-  {
-    "icon": "Fire",
-    "name": "今日热榜",
-    "link": "https://hot.imsyy.top/"
+    "name": "导航页",
+    "link": "https://nav.kayro.cn/"
   },
   {
     "icon": "LaptopCode",

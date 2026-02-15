@@ -1,9 +1,7 @@
 <template>
   <div v-if="siteLinks[0]" class="links">
     <div class="line">
-      <Icon size="20">
-        <Link />
-      </Icon>
+      <FontAwesomeIcon class="line-icon" :icon="faLink" />
       <span class="title">网站列表</span>
     </div>
     <!-- 网站列表 -->
@@ -27,9 +25,7 @@
               :style="index < 3 ? 'margin-bottom: 20px' : null"
               @click="jumpLink(item)"
             >
-              <Icon size="26">
-                <component :is="siteIcon[item.icon]" />
-              </Icon>
+              <FontAwesomeIcon class="site-icon" :icon="siteIcon[item.icon] || faLink" />
               <span class="name text-hidden">{{ item.name }}</span>
             </div>
           </el-col>
@@ -41,9 +37,16 @@
 </template>
 
 <script setup>
-import { Icon } from "@vicons/utils";
-// 可前往 https://www.xicons.org 自行挑选并在此处引入
-import { Link, Blog, CompactDisc, Cloud, Compass, Book, Fire, LaptopCode } from "@vicons/fa"; // 注意使用正确的类别
+import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
+import {
+  faLink,
+  faBlog,
+  faTv,
+  faCompactDisc,
+  faImages,
+  faCompass,
+  faLaptopCode,
+} from "@fortawesome/free-solid-svg-icons";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Mousewheel } from "swiper/modules";
@@ -63,13 +66,12 @@ const siteLinksList = computed(() => {
 
 // 网站链接图标
 const siteIcon = {
-  Blog,
-  Cloud,
-  CompactDisc,
-  Compass,
-  Book,
-  Fire,
-  LaptopCode,
+  Blog: faBlog,
+  Tv: faTv,
+  CompactDisc: faCompactDisc,
+  Images: faImages,
+  Compass: faCompass,
+  LaptopCode: faLaptopCode,
 };
 
 // 链接跳转
@@ -94,6 +96,9 @@ onMounted(() => {
     display: flex;
     align-items: center;
     animation: fade 0.5s;
+    .line-icon {
+      font-size: 20px;
+    }
     .title {
       margin-left: 8px;
       font-size: 1.15rem;
@@ -143,6 +148,10 @@ onMounted(() => {
 
       &:active {
         transform: scale(1);
+      }
+
+      .site-icon {
+        font-size: 26px;
       }
 
       .name {
