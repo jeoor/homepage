@@ -2,7 +2,7 @@
   {
     "icon": "Blog",
     "name": "博客",
-    "link": "https://blog.imsyy.top/"
+    "link": "https://blog.kayro.cn/"
   },
   {
     "icon": "Cloud",
@@ -32,6 +32,6 @@
   {
     "icon": "LaptopCode",
     "name": "站点监测",
-    "link": "https://status.imsyy.top/"
+    "link": "https://status.kayro.cn/"
   }
 ]

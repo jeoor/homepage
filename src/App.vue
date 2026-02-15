@@ -179,6 +179,7 @@ onBeforeUnmount(() => {
     border-radius: 6px;
     transition: transform 0.3s;
     animation: fade 0.5s;
+    z-index: 10;
     &:active {
       transform: scale(0.95);
     }
