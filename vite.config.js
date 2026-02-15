@@ -88,9 +88,21 @@ export default ({ mode }) =>
     },
     build: {
       minify: "terser",
+      chunkSizeWarningLimit: 600,
       terserOptions: {
         compress: {
           pure_funcs: ["console.log"],
+        },
+      },
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            "vue-vendor": ["vue", "pinia"],
+            "element-plus": ["element-plus"],
+            "swiper": ["swiper"],
+            "aplayer": ["aplayer", "@worstone/vue-aplayer"],
+            "icons": ["@fortawesome/fontawesome-svg-core", "@fortawesome/free-solid-svg-icons", "@fortawesome/vue-fontawesome", "@icon-park/vue-next"],
+          },
         },
       },
     },
