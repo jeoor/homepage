@@ -1,0 +1,20 @@
+# 搜索引擎爬虫指南
+User-agent: *
+Allow: /
+
+# 禁止爬虫访问的目录
+Disallow: /node_modules/
+Disallow: /dist/
+
+# 允许特定搜索引擎
+User-agent: Googlebot
+Allow: /
+
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Sitemap 地址
+Sitemap: https://kayro.cn/sitemap.xml
