@@ -15,12 +15,10 @@
         <Icon size="16">
           <QuoteLeft />
         </Icon>
-        <Transition name="fade" mode="out-in">
-          <div :key="descriptionText.hello + descriptionText.text" class="text">
-            <p>{{ descriptionText.hello }}</p>
-            <p>{{ descriptionText.text }}</p>
-          </div>
-        </Transition>
+        <div class="text">
+          <p>{{ descriptionText.hello }}</p>
+          <p>{{ descriptionText.text }}</p>
+        </div>
         <Icon size="16">
           <QuoteRight />
         </Icon>
@@ -58,7 +56,7 @@ const descriptionText = reactive({
 
 // 切换右侧功能区
 const changeBox = () => {
-  if (store.getInnerWidth >= 721) {
+  if (store.getInnerWidth >= 990) {
     store.boxOpenState = !store.boxOpenState;
   } else {
     ElMessage({
@@ -112,7 +110,7 @@ watch(
       .sm {
         margin-left: 6px;
         font-size: 2rem;
-        @media (min-width: 721px) and (max-width: 789px) {
+        @media (min-width: 720px) and (max-width: 789px) {
           display: none;
         }
       }
@@ -148,7 +146,6 @@ watch(
         margin: 0.75rem 1rem;
         line-height: 2rem;
         margin-right: auto;
-        transition: opacity 0.2s;
 
         p {
           &:nth-of-type(1) {
@@ -166,28 +163,28 @@ watch(
       pointer-events: none;
     }
   }
-  // @media (max-width: 390px) {
-  //   .logo {
-  //     flex-direction: column;
-  //     .logo-img {
-  //       display: none;
-  //     }
-  //     .name {
-  //       margin-left: 0;
-  //       height: auto;
-  //       transform: none;
-  //       text-align: center;
-  //       .bg {
-  //         font-size: 3.5rem;
-  //       }
-  //       .sm {
-  //         font-size: 1.4rem;
-  //       }
-  //     }
-  //   }
-  //   .description {
-  //     margin-top: 2.5rem;
-  //   }
-  // }
+  @media (max-width: 390px) {
+    .logo {
+      flex-direction: column;
+      .logo-img {
+        width: 88px;
+      }
+      .name {
+        margin-left: 0;
+        height: auto;
+        transform: none;
+        text-align: center;
+        .bg {
+          font-size: 3.5rem;
+        }
+        .sm {
+          font-size: 1.4rem;
+        }
+      }
+    }
+    .description {
+      margin-top: 2.5rem;
+    }
+  }
 }
 </style>

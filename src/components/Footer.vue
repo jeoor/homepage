@@ -2,31 +2,34 @@
   <footer id="footer" :class="store.footerBlur ? 'blur' : null">
     <Transition name="fade" mode="out-in">
       <div v-if="!store.playerState || !store.playerLrcShow" class="power">
-        <span>
-          <span :class="startYear < fullYear ? 'c-hidden' : 'hidden'">Copyright&nbsp;</span>
-          &copy;
-          <span v-if="startYear < fullYear"
-            class="site-start">
-            {{ startYear }}
+        <span class="footer-item">
+          Copyright&nbsp;&copy;
+          <span v-if="siteStartYear !== fullYear" class="site-start">
+            {{ siteStartYear }}
             -
           </span>
           {{ fullYear }}
-          <a :href="siteUrl">{{ siteAuthor }}</a>
+          <a :href="siteUrl">{{ siteAnthor }}</a>
         </span>
         <!-- 以下信息请不要修改哦 -->
-        <span class="hidden">
+        <span class="footer-item hidden">
           &amp;&nbsp;Made&nbsp;by
           <a :href="config.github" target="_blank">
             {{ config.author }}
           </a>
         </span>
         <!-- 站点备案 -->
-        <span>
-          &amp;
-          <a v-if="siteIcp" href="https://beian.miit.gov.cn" target="_blank">
-            {{ siteIcp }}
-          </a>
-        </span>
+        <a v-if="siteIcp" class="footer-item" href="https://beian.miit.gov.cn" target="_blank">
+          &amp;&nbsp;{{ siteIcp }}
+        </a>
+        <!-- 公网安备 -->
+        <a v-if="sitePublicSecurity" class="footer-item" :href="publicSecurityUrl" target="_blank">
+          &amp;&nbsp;{{ sitePublicSecurity }}
+        </a>
+        <!-- 萌ICP备 -->
+        <a v-if="siteMengIcp" class="footer-item" :href="mengIcpUrl" target="_blank">
+          &amp;&nbsp;{{ siteMengIcp }}
+        </a>
       </div>
       <div v-else class="lrc">
         <Transition name="fade" mode="out-in">
@@ -50,13 +53,17 @@ const store = mainStore();
 const fullYear = new Date().getFullYear();
 
 // 加载配置数据
-// const siteStartDate = ref(import.meta.env.VITE_SITE_START);
-const startYear = ref(
-  import.meta.env.VITE_SITE_START?.length >= 4 ? 
-  import.meta.env.VITE_SITE_START.substring(0, 4) : null
-);
+const siteStartDate = ref(import.meta.env.VITE_SITE_START);
+const siteStartYear = computed(() => {
+  if (siteStartDate.value?.length >= 4) {
+    return parseInt(siteStartDate.value.substring(0, 4));
+  }
+  return fullYear;
+});
 const siteIcp = ref(import.meta.env.VITE_SITE_ICP);
-const siteAuthor = ref(import.meta.env.VITE_SITE_AUTHOR);
+const sitePublicSecurity = ref(import.meta.env.VITE_SITE_PUBLIC_SECURITY);
+const siteMengIcp = ref(import.meta.env.VITE_SITE_MENG_ICP);
+const siteAnthor = ref(import.meta.env.VITE_SITE_ANTHOR);
 const siteUrl = computed(() => {
   const url = import.meta.env.VITE_SITE_URL;
   if (!url) return "https://www.imsyy.top";
@@ -66,6 +73,26 @@ const siteUrl = computed(() => {
   }
   return url;
 });
+
+// 公网安备链接
+const publicSecurityUrl = computed(() => {
+  const code = sitePublicSecurity.value;
+  if (!code) return "https://beian.mps.gov.cn";
+  // 提取数字部分
+  const match = code.match(/\d+/);
+  const number = match ? match[0] : code;
+  return `https://beian.mps.gov.cn/#/query/webSearch?code=${number}`;
+});
+
+// 萌ICP备链接
+const mengIcpUrl = computed(() => {
+  const keyword = siteMengIcp.value;
+  if (!keyword) return "https://icp.gov.moe";
+  // 提取数字部分
+  const match = keyword.match(/\d+/);
+  const number = match ? match[0] : keyword;
+  return `https://icp.gov.moe/?keyword=${number}`;
+});
 </script>
 
 <style lang="scss" scoped>
@@ -74,19 +101,26 @@ const siteUrl = computed(() => {
   position: absolute;
   bottom: 0;
   left: 0;
-  height: 46px;
-  line-height: 46px;
-  text-align: center;
   z-index: 0;
-  font-size: 14px;
-  // 文字不换行
-  word-break: keep-all;
-  white-space: nowrap;
   .power {
     animation: fade 0.3s;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
+    padding: 8px;
+    font-size: 14px;
+    line-height: 1.4;
+  }
+  .footer-item {
+    white-space: nowrap;
+    display: inline-block;
   }
   .lrc {
     padding: 0 20px;
+    height: 46px;
+    line-height: 46px;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -110,24 +144,27 @@ const siteUrl = computed(() => {
   &.blur {
     backdrop-filter: blur(10px);
     background: rgb(0 0 0 / 25%);
-    font-size: 16px;
+    .power {
+      font-size: 16px;
+    }
   }
   .fade-enter-active,
   .fade-leave-active {
     transition: opacity 0.15s ease-in-out;
   }
-  @media (max-width: 720px) {
-    font-size: 0.9rem;
-    &.blur {
-      font-size: 0.9rem;
-    }
-  }
-  @media (max-width: 560px) {
-    .c-hidden {
-      display: none;
+  @media (max-width: 768px) {
+    .power {
+      font-size: 12px;
+      gap: 6px;
+      padding: 6px;
     }
   }
   @media (max-width: 480px) {
+    .power {
+      font-size: 11px;
+      gap: 4px;
+      padding: 4px 6px;
+    }
     .hidden {
       display: none;
     }

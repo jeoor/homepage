@@ -13,8 +13,6 @@ html,
 body {
   width: 100%;
   height: 100%;
-  // width: 100dvh;
-  // height: 100dvh;
   margin: 0;
   padding: 0;
   background-color: #333;
@@ -37,12 +35,6 @@ p {
   }
 }
 
-// 链接悬停效果
-a:hover {
-  color: rgb(57, 159, 255);
-  text-decoration: underline;
-}
-
 // 字体文件
 @font-face {
   font-family: "Pacifico-Regular";
@@ -61,8 +53,8 @@ a:hover {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   z-index: 0;
 }
 

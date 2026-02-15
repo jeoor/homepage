@@ -109,22 +109,14 @@ onMounted(() => {
       height: 100%;
     }
     .swiper-pagination {
-      margin-top: 12px;
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      justify-content: center;
+      position: static;
+      margin-top: 4px;
       :deep(.swiper-pagination-bullet) {
         background-color: #fff;
-        width: 20px;
+        width: 18px;
         height: 4px;
-        margin: 0 4px;
         border-radius: 4px;
-        opacity: 0.2;
         transition: opacity 0.3s;
-        &.swiper-pagination-bullet-active {
-          opacity: 1;
-        }
         &:hover {
           opacity: 1;
         }
