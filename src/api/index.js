@@ -75,58 +75,55 @@ export const getWeather = async (key, city) => {
 // 获取 Open-Meteo 天气 API（无需密钥，支持CORS）
 // https://open-meteo.com/
 export const getOtherWeather = async () => {
-  try {
-    console.log("Open-Meteo - 开始获取天气数据...");
+  const CACHE_KEY = "weather_cache_v1";
+  const CACHE_TTL = 1000 * 60 * 30;
 
-    let latitude, longitude, city;
-
-    // 使用 IP 定位获取坐标和城市
-    const geoRes = await fetch("http://ip-api.com/json/?fields=lat,lon,city", {
-      credentials: "omit",
-    });
-
-    if (geoRes.ok) {
-      const geoData = await geoRes.json();
-      latitude = parseFloat(geoData.lat);
-      longitude = parseFloat(geoData.lon);
-      city = geoData.city;
-      console.log("IP定位成功:", { latitude, longitude, city });
-    } else {
-      console.log("IP定位失败");
+  const readCache = () => {
+    try {
+      const raw = localStorage.getItem(CACHE_KEY);
+      if (!raw) return null;
+      const cache = JSON.parse(raw);
+      if (!cache?.timestamp || !cache?.data) return null;
+      if (Date.now() - cache.timestamp > CACHE_TTL) return null;
+      return cache.data;
+    } catch (error) {
+      console.warn("读取天气缓存失败:", error);
+      return null;
     }
+  };
 
-    // 确保坐标是数字类型
-    latitude = parseFloat(latitude);
-    longitude = parseFloat(longitude);
-
-    console.log(`最终坐标 - 纬度: ${latitude}, 经度: ${longitude}, 城市: ${city}`);
-
-    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
-      throw new Error(`无法获取有效的地理坐标, latitude: ${latitude}, longitude: ${longitude}`);
+  const writeCache = (data) => {
+    try {
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({
+          timestamp: Date.now(),
+          data,
+        }),
+      );
+    } catch (error) {
+      console.warn("写入天气缓存失败:", error);
     }
+  };
 
-    // 获取天气数据
-    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=auto`;
-    console.log("请求天气URL:", weatherUrl);
-
-    const weatherRes = await fetch(weatherUrl, {
-      credentials: "omit",
-    });
-
-    if (!weatherRes.ok) {
-      throw new Error(`天气 API 返回错误: ${weatherRes.status}`);
+  const fetchJsonWithTimeout = async (url, timeout = 5000) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const response = await fetch(url, {
+        credentials: "omit",
+        signal: controller.signal,
+      });
+      if (!response.ok) return null;
+      return await response.json();
+    } catch (error) {
+      return null;
+    } finally {
+      clearTimeout(timer);
     }
+  };
 
-    const weatherData = await weatherRes.json();
-    console.log("天气数据:", weatherData);
-
-    if (!weatherData.current) {
-      throw new Error("天气数据中缺少 current 字段");
-    }
-
-    const current = weatherData.current;
-
-    // 天气代码转换为中文
+  const toWeatherResult = (city, current) => {
     const weatherCodeMap = {
       0: "晴朗",
       1: "晴朗",
@@ -154,19 +151,17 @@ export const getOtherWeather = async () => {
       99: "冰雹雷暴",
     };
 
-    // 风向角度转换为风向描述
     const getWindDirection = (degrees) => {
       const directions = [
         "北", "北东北", "东北", "东东北",
         "东", "东东南", "东南", "南东南",
         "南", "南西南", "西南", "西西南",
-        "西", "西西北", "西北", "北西北"
+        "西", "西西北", "西北", "北西北",
       ];
       const index = Math.round((degrees % 360) / 22.5) % 16;
       return directions[index] + "风";
     };
 
-    // 风速转风级（美国Beaufort风级）
     const getWindPower = (speed) => {
       if (speed < 1) return "0";
       if (speed < 2) return "1";
@@ -197,8 +192,69 @@ export const getOtherWeather = async () => {
         },
       },
     };
+  };
+
+  try {
+    console.log("Open-Meteo - 开始获取天气数据...");
+
+    const [ipWhoData, ipapiCoData] = await Promise.all([
+      fetchJsonWithTimeout("https://ipwho.is/", 4000),
+      fetchJsonWithTimeout("https://ipapi.co/json/", 4000),
+    ]);
+
+    let latitude = null;
+    let longitude = null;
+    let city = null;
+
+    if (ipWhoData?.success !== false && ipWhoData?.latitude && ipWhoData?.longitude) {
+      latitude = parseFloat(ipWhoData.latitude);
+      longitude = parseFloat(ipWhoData.longitude);
+      city = ipWhoData.city;
+      console.log("使用 ipwho.is 定位:", { latitude, longitude, city });
+    } else if (ipapiCoData?.latitude && ipapiCoData?.longitude) {
+      latitude = parseFloat(ipapiCoData.latitude);
+      longitude = parseFloat(ipapiCoData.longitude);
+      city = ipapiCoData.city;
+      console.log("使用 ipapi.co 定位:", { latitude, longitude, city });
+    }
+
+    console.log(`最终坐标 - 纬度: ${latitude}, 经度: ${longitude}, 城市: ${city}`);
+
+    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+      throw new Error(`无法获取有效的地理坐标, latitude: ${latitude}, longitude: ${longitude}`);
+    }
+
+    // 获取天气数据
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=auto`;
+    console.log("请求天气URL:", weatherUrl);
+
+    let weatherData = null;
+    for (let i = 0; i < 2; i++) {
+      weatherData = await fetchJsonWithTimeout(weatherUrl, 5000);
+      if (weatherData?.current) break;
+      console.warn(`天气请求第 ${i + 1} 次失败，准备重试...`);
+    }
+
+    if (!weatherData?.current) {
+      throw new Error("天气 API 请求失败或返回数据不完整");
+    }
+
+    console.log("天气数据:", weatherData);
+
+    const current = weatherData.current;
+
+    const result = toWeatherResult(city, current);
+    writeCache(result);
+    return result;
   } catch (error) {
     console.error("Open-Meteo API 调用失败:", error);
+
+    const cached = readCache();
+    if (cached) {
+      console.warn("使用天气缓存数据作为兜底");
+      return cached;
+    }
+
     throw error;
   }
 };
