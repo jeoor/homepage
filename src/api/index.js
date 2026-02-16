@@ -75,12 +75,105 @@ export const getWeather = async (key, city) => {
 // 获取 Open-Meteo 天气 API（无需密钥，支持CORS）
 // https://open-meteo.com/
 export const getOtherWeather = async () => {
-  const getJson = async (url) => {
-    const res = await fetch(url, {
-      credentials: "omit",
+  const GEO_CACHE_KEY = "weather_geo_cache_v1";
+  const GEO_CACHE_TTL = 1000 * 60 * 60 * 24;
+
+  const readGeoCache = () => {
+    try {
+      const raw = localStorage.getItem(GEO_CACHE_KEY);
+      if (!raw) return null;
+      const cache = JSON.parse(raw);
+      if (!cache?.timestamp) return null;
+      if (Date.now() - cache.timestamp > GEO_CACHE_TTL) return null;
+      if (!cache?.latitude || !cache?.longitude) return null;
+      return cache;
+    } catch {
+      return null;
+    }
+  };
+
+  const writeGeoCache = (latitude, longitude, city) => {
+    try {
+      localStorage.setItem(
+        GEO_CACHE_KEY,
+        JSON.stringify({
+          timestamp: Date.now(),
+          latitude,
+          longitude,
+          city,
+        }),
+      );
+    } catch {
+      // ignore
+    }
+  };
+
+  const getJson = async (url, timeout = 3500) => {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeout);
+    try {
+      const res = await fetch(url, {
+        credentials: "omit",
+        signal: controller.signal,
+      });
+      if (!res.ok) throw new Error(`请求失败: ${url}`);
+      return await res.json();
+    } finally {
+      clearTimeout(timer);
+    }
+  };
+
+  const firstFulfilled = (promises) =>
+    new Promise((resolve, reject) => {
+      let pending = promises.length;
+      const errors = [];
+      if (pending === 0) {
+        reject(new Error("no promises"));
+        return;
+      }
+
+      promises.forEach((p, index) => {
+        Promise.resolve(p).then(resolve, (err) => {
+          errors[index] = err;
+          pending -= 1;
+          if (pending === 0) {
+            reject(errors[0] || new Error("all promises rejected"));
+          }
+        });
+      });
     });
-    if (!res.ok) throw new Error(`请求失败: ${url}`);
-    return await res.json();
+
+  const getGeoFromIpinfo = async () => {
+    const data = await getJson("https://ipinfo.io/json", 2000);
+    if (!data?.loc) throw new Error("ipinfo: no loc");
+    const [lat, lng] = String(data.loc).split(",");
+    const latitude = Number(lat);
+    const longitude = Number(lng);
+    if (!latitude || !longitude || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      throw new Error("ipinfo: invalid coords");
+    }
+    return { latitude, longitude, city: data.city || null };
+  };
+
+  const getGeoFromIpwho = async () => {
+    const data = await getJson("https://ipwho.is/", 3500);
+    if (data?.success === false) throw new Error("ipwho: success=false");
+    const latitude = Number(data?.latitude);
+    const longitude = Number(data?.longitude);
+    if (!latitude || !longitude || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      throw new Error("ipwho: invalid coords");
+    }
+    return { latitude, longitude, city: data.city || null };
+  };
+
+  const getGeoFromIpapi = async () => {
+    const data = await getJson("https://ipapi.co/json/", 3500);
+    const latitude = Number(data?.latitude);
+    const longitude = Number(data?.longitude);
+    if (!latitude || !longitude || Number.isNaN(latitude) || Number.isNaN(longitude)) {
+      throw new Error("ipapi: invalid coords");
+    }
+    return { latitude, longitude, city: data.city || null };
   };
 
   const weatherCodeMap = {
@@ -141,32 +234,25 @@ export const getOtherWeather = async () => {
   let longitude = null;
   let city = null;
 
-  const [ipWhoResult, ipapiResult] = await Promise.allSettled([
-    getJson("https://ipwho.is/"),
-    getJson("https://ipapi.co/json/"),
-  ]);
-
-  if (
-    ipWhoResult.status === "fulfilled" &&
-    ipWhoResult.value?.success !== false &&
-    ipWhoResult.value?.latitude &&
-    ipWhoResult.value?.longitude
-  ) {
-    latitude = Number(ipWhoResult.value.latitude);
-    longitude = Number(ipWhoResult.value.longitude);
-    city = ipWhoResult.value.city;
-  } else if (
-    ipapiResult.status === "fulfilled" &&
-    ipapiResult.value?.latitude &&
-    ipapiResult.value?.longitude
-  ) {
-    latitude = Number(ipapiResult.value.latitude);
-    longitude = Number(ipapiResult.value.longitude);
-    city = ipapiResult.value.city;
-  }
-
-  if (!latitude || !longitude || Number.isNaN(latitude) || Number.isNaN(longitude)) {
-    throw new Error("无法获取有效的地理坐标");
+  try {
+    const geo = await firstFulfilled([
+      getGeoFromIpinfo(),
+      getGeoFromIpwho(),
+      getGeoFromIpapi(),
+    ]);
+    latitude = geo.latitude;
+    longitude = geo.longitude;
+    city = geo.city;
+    writeGeoCache(latitude, longitude, city);
+  } catch (error) {
+    const cached = readGeoCache();
+    if (cached) {
+      latitude = Number(cached.latitude);
+      longitude = Number(cached.longitude);
+      city = cached.city || city;
+    } else {
+      throw new Error("无法获取有效的地理坐标");
+    }
   }
 
   if (!city || /[A-Za-z]/.test(city)) {
