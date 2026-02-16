@@ -80,37 +80,19 @@ export const getOtherWeather = async () => {
 
     let latitude, longitude, city;
 
-    // 尝试方法1: 先用IP获取城市（确保获取城市名）
-    try {
-      const geoRes = await fetch("https://ipapi.co/json/", {
-        credentials: "omit",
-      });
-      if (geoRes.ok) {
-        const geoData = await geoRes.json();
-        console.log("ipapi.co 数据:", geoData);
-        latitude = parseFloat(geoData.latitude);
-        longitude = parseFloat(geoData.longitude);
-        city = geoData.city;
-        console.log("使用IP定位:", { latitude, longitude, city });
-      }
-    } catch (e) {
-      console.log("ipapi.co 失败，尝试 ip-api...");
-      try {
-        // 尝试备用IP地理定位
-        const geoRes = await fetch("http://ip-api.com/json/?fields=lat,lon,city", {
-          credentials: "omit",
-        });
-        if (geoRes.ok) {
-          const geoData = await geoRes.json();
-          console.log("ip-api 数据:", geoData);
-          latitude = parseFloat(geoData.lat);
-          longitude = parseFloat(geoData.lon);
-          city = geoData.city;
-          console.log("使用 ip-api 定位:", { latitude, longitude, city });
-        }
-      } catch (e2) {
-        console.log("ip-api 也失败了");
-      }
+    // 使用 IP 定位获取坐标和城市
+    const geoRes = await fetch("http://ip-api.com/json/?fields=lat,lon,city", {
+      credentials: "omit",
+    });
+
+    if (geoRes.ok) {
+      const geoData = await geoRes.json();
+      latitude = parseFloat(geoData.lat);
+      longitude = parseFloat(geoData.lon);
+      city = geoData.city;
+      console.log("IP定位成功:", { latitude, longitude, city });
+    } else {
+      console.log("IP定位失败");
     }
 
     // 确保坐标是数字类型
