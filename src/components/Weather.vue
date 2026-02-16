@@ -53,31 +53,59 @@ const getTemperature = (min, max) => {
 // 获取天气数据
 const getWeatherData = async () => {
   try {
-    // 如果配置了高德 Key，先尝试高德 API
+    // 检测是否是移动端
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(
+      navigator.userAgent
+    );
+
+    // 移动端直接使用 Open-Meteo IP 定位
+    if (isMobile) {
+      console.log("移动端检测 - 使用 Open-Meteo IP 定位");
+      const result = await getOtherWeather();
+      console.log("Open-Meteo 响应:", result);
+
+      if (!result.result) {
+        throw new Error("天气数据返回格式错误");
+      }
+
+      const data = result.result;
+      weatherData.adCode = {
+        city: data.city.City || "未知地区",
+      };
+      weatherData.weather = {
+        weather: data.condition.day_weather,
+        temperature: getTemperature(data.condition.min_degree, data.condition.max_degree),
+        winddirection: data.condition.day_wind_direction,
+        windpower: data.condition.day_wind_power,
+      };
+      return;
+    }
+
+    // 桌面端：如果配置了高德 Key，先尝试高德 API
     if (mainKey) {
       try {
-        console.log("尝试获取高德天气数据...");
+        console.log("桌面端 - 尝试获取高德天气数据...");
         // 获取 Adcode
         const adCode = await getAdcode(mainKey);
         console.log("高德 Adcode 响应:", adCode);
-        
+
         if (!adCode.infocode || adCode.infocode !== "10000") {
           throw new Error("高德地区查询失败，降级使用备用API");
         }
-        
+
         weatherData.adCode = {
           city: adCode.city,
           adcode: adCode.adcode,
         };
-        
+
         // 获取天气信息
         const result = await getWeather(mainKey, weatherData.adCode.adcode);
         console.log("高德天气响应:", result);
-        
+
         if (!result.lives || !result.lives[0]) {
           throw new Error("高德天气数据无效，降级使用备用API");
         }
-        
+
         weatherData.weather = {
           weather: result.lives[0].weather,
           temperature: result.lives[0].temperature,
@@ -91,15 +119,15 @@ const getWeatherData = async () => {
       }
     }
 
-    // 使用备用 Open-Meteo API
-    console.log("使用备用 Open-Meteo 天气接口");
+    // 桌面端备用方案：使用 Open-Meteo
+    console.log("桌面端 - 使用备用 Open-Meteo 天气接口");
     const result = await getOtherWeather();
     console.log("Open-Meteo 响应:", result);
-    
+
     if (!result.result) {
       throw new Error("天气数据返回格式错误");
     }
-    
+
     const data = result.result;
     weatherData.adCode = {
       city: data.city.City || "未知地区",
