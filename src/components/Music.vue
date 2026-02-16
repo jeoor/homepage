@@ -255,7 +255,7 @@ watch(
   height: 100%;
   background-color: #00000080;
   backdrop-filter: blur(20px);
-  z-index: 1;
+  z-index: 11;
   .list {
     position: absolute;
     display: flex;
@@ -267,7 +267,7 @@ watch(
     height: 600px;
     background-color: #ffffff66;
     border-radius: 6px;
-    z-index: 999;
+    z-index: 12;
     @media (max-width: 720px) {
       left: calc(50% - 45%);
       width: 90%;
