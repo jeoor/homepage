@@ -137,82 +137,32 @@ export const getOtherWeather = async () => {
     return "12";
   };
 
-  const normalizeCity = (value, fallback = "") => {
-    if (Array.isArray(value)) return value[0] || fallback;
-    return value || fallback;
-  };
-
-  const normalizeText = (value, fallback = "") => {
-    const text = Array.isArray(value) ? value[0] : value;
-    if (typeof text !== "string") return fallback;
-    const trimmed = text.trim();
-    return trimmed || fallback;
-  };
-
   let latitude = null;
   let longitude = null;
   let city = null;
 
-  if (weatherKey) {
-    try {
-      const adcodeData = await getJson(`https://restapi.amap.com/v3/ip?key=${weatherKey}`);
-      const amapAdcode = normalizeText(adcodeData?.adcode);
-      const amapCity = normalizeText(adcodeData?.city, normalizeText(adcodeData?.province, city));
+  const [ipWhoResult, ipapiResult] = await Promise.allSettled([
+    getJson("https://ipwho.is/"),
+    getJson("https://ipapi.co/json/"),
+  ]);
 
-      if (adcodeData?.infocode === "10000" && amapAdcode) {
-        city = amapCity;
-
-        const districtData = await getJson(
-          `https://restapi.amap.com/v3/config/district?key=${weatherKey}&keywords=${amapAdcode}&subdistrict=0&extensions=base`,
-        );
-        const center = districtData?.districts?.[0]?.center;
-
-        if (center) {
-          const [lng, lat] = center.split(",");
-          latitude = Number(lat);
-          longitude = Number(lng);
-          city = city || districtData?.districts?.[0]?.name;
-        } else if (city) {
-          const geoData = await getJson(
-            `https://restapi.amap.com/v3/geocode/geo?key=${weatherKey}&address=${encodeURIComponent(city)}`,
-          );
-          const location = geoData?.geocodes?.[0]?.location;
-          if (location) {
-            const [lng, lat] = location.split(",");
-            latitude = Number(lat);
-            longitude = Number(lng);
-          }
-        }
-      }
-    } catch (error) {
-      console.warn("高德定位失败，回退到 IP 定位");
-    }
-  }
-
-  if (!latitude || !longitude) {
-    const [ipWhoResult, ipapiResult] = await Promise.allSettled([
-      getJson("https://ipwho.is/"),
-      getJson("https://ipapi.co/json/"),
-    ]);
-
-    if (
-      ipWhoResult.status === "fulfilled" &&
-      ipWhoResult.value?.success !== false &&
-      ipWhoResult.value?.latitude &&
-      ipWhoResult.value?.longitude
-    ) {
-      latitude = Number(ipWhoResult.value.latitude);
-      longitude = Number(ipWhoResult.value.longitude);
-      city = ipWhoResult.value.city;
-    } else if (
-      ipapiResult.status === "fulfilled" &&
-      ipapiResult.value?.latitude &&
-      ipapiResult.value?.longitude
-    ) {
-      latitude = Number(ipapiResult.value.latitude);
-      longitude = Number(ipapiResult.value.longitude);
-      city = ipapiResult.value.city;
-    }
+  if (
+    ipWhoResult.status === "fulfilled" &&
+    ipWhoResult.value?.success !== false &&
+    ipWhoResult.value?.latitude &&
+    ipWhoResult.value?.longitude
+  ) {
+    latitude = Number(ipWhoResult.value.latitude);
+    longitude = Number(ipWhoResult.value.longitude);
+    city = ipWhoResult.value.city;
+  } else if (
+    ipapiResult.status === "fulfilled" &&
+    ipapiResult.value?.latitude &&
+    ipapiResult.value?.longitude
+  ) {
+    latitude = Number(ipapiResult.value.latitude);
+    longitude = Number(ipapiResult.value.longitude);
+    city = ipapiResult.value.city;
   }
 
   if (!latitude || !longitude || Number.isNaN(latitude) || Number.isNaN(longitude)) {
@@ -221,15 +171,6 @@ export const getOtherWeather = async () => {
 
   if (!city || /[A-Za-z]/.test(city)) {
     try {
-      if (weatherKey) {
-        const amapReverse = await getJson(
-          `https://restapi.amap.com/v3/geocode/regeo?key=${weatherKey}&location=${longitude},${latitude}&extensions=base`,
-        );
-        const cityName = amapReverse?.regeocode?.addressComponent?.city;
-        const districtName = amapReverse?.regeocode?.addressComponent?.district;
-        city = normalizeCity(cityName, districtName) || city;
-      }
-
       if (city && /[A-Za-z]/.test(city)) {
         const searchGeo = await getJson(
           `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=zh&format=json&countryCode=CN`,
@@ -242,7 +183,7 @@ export const getOtherWeather = async () => {
   }
 
   const weatherData = await getJson(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=auto`,
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=Asia%2FShanghai`,
   );
 
   if (!weatherData?.current) {
