@@ -3,13 +3,7 @@
     <Transition name="fade" mode="out-in">
       <div v-if="!store.playerState || !store.playerLrcShow" class="power">
         <span class="footer-item">
-          Copyright&nbsp;&copy;
-          <span v-if="siteStartYear !== fullYear" class="site-start">
-            {{ siteStartYear }}
-            -
-          </span>
-          {{ fullYear }}
-          <a :href="siteUrl">{{ siteAnthor }}</a>
+          {{ fullYear }}&nbsp;&copy;&nbsp;<a :href="siteUrl">{{ siteAnthor }}</a>
         </span>
         <!-- 以下信息请不要修改哦 -->
         <span class="footer-item hidden">
@@ -161,9 +155,14 @@ const mengIcpUrl = computed(() => {
   }
   @media (max-width: 480px) {
     .power {
-      font-size: 11px;
-      gap: 4px;
-      padding: 4px 6px;
+      font-size: 10px;
+      gap: 3px;
+      padding: 3px 4px;
+      line-height: 1.3;
+    }
+    .footer-item {
+      white-space: normal;
+      word-break: break-word;
     }
     .hidden {
       display: none;

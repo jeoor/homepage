@@ -56,6 +56,16 @@ p {
   width: 100vw;
   height: 100vh;
   z-index: 0;
+  overflow: hidden;
+}
+
+// 手机端适配 - 使用 dvh (dynamic viewport height)
+@supports (height: 100dvh) {
+  @media (max-width: 720px) {
+    #app {
+      height: 100dvh;
+    }
+  }
 }
 
 // 卡片样式
