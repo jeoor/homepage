@@ -78,25 +78,55 @@ export const getOtherWeather = async () => {
   try {
     console.log("Open-Meteo - 开始获取天气数据...");
 
-    // 先获取用户IP和位置
-    const geoRes = await fetch("https://ipapi.co/json/", {
-      credentials: "omit",
-    });
+    let latitude, longitude, city;
 
-    if (!geoRes.ok) {
-      throw new Error(`地理位置 API 返回错误: ${geoRes.status}`);
+    // 尝试方法1: 使用浏览器 Geolocation API
+    try {
+      const position = await new Promise((resolve, reject) => {
+        navigator.geolocation.getCurrentPosition(resolve, reject, {
+          timeout: 5000,
+        });
+      });
+      latitude = position.coords.latitude;
+      longitude = position.coords.longitude;
+      console.log("使用浏览器定位:", { latitude, longitude });
+    } catch (e) {
+      console.log("浏览器定位失败，尝试IP定位...");
+
+      // 尝试方法2: 使用 ipapi.co
+      try {
+        const geoRes = await fetch("https://ipapi.co/json/", {
+          credentials: "omit",
+        });
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          console.log("ipapi.co 数据:", geoData);
+          latitude = parseFloat(geoData.latitude);
+          longitude = parseFloat(geoData.longitude);
+          city = geoData.city;
+        }
+      } catch (e2) {
+        console.log("ipapi.co 失败，尝试 ip-api...");
+
+        // 尝试方法3: 使用 ip-api.com
+        const geoRes = await fetch("http://ip-api.com/json/?fields=lat,lon,city", {
+          credentials: "omit",
+        });
+        if (geoRes.ok) {
+          const geoData = await geoRes.json();
+          console.log("ip-api 数据:", geoData);
+          latitude = parseFloat(geoData.lat);
+          longitude = parseFloat(geoData.lon);
+          city = geoData.city;
+        }
+      }
     }
-
-    const geoData = await geoRes.json();
-    console.log("地理位置数据:", geoData);
-
-    let { latitude, longitude, city } = geoData;
 
     // 确保坐标是数字类型
     latitude = parseFloat(latitude);
     longitude = parseFloat(longitude);
 
-    console.log(`解析后的坐标 - 纬度: ${latitude}, 经度: ${longitude}, 城市: ${city}`);
+    console.log(`最终坐标 - 纬度: ${latitude}, 经度: ${longitude}, 城市: ${city}`);
 
     if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
       throw new Error(`无法获取有效的地理坐标, latitude: ${latitude}, longitude: ${longitude}`);
@@ -104,7 +134,7 @@ export const getOtherWeather = async () => {
 
     // 获取天气数据
     const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=auto`;
-    console.log("请求URL:", weatherUrl);
+    console.log("请求天气URL:", weatherUrl);
 
     const weatherRes = await fetch(weatherUrl, {
       credentials: "omit",
@@ -151,6 +181,35 @@ export const getOtherWeather = async () => {
       99: "冰雹雷暴",
     };
 
+    // 风向角度转换为风向描述
+    const getWindDirection = (degrees) => {
+      const directions = [
+        "北", "北东北", "东北", "东东北",
+        "东", "东东南", "东南", "南东南",
+        "南", "南西南", "西南", "西西南",
+        "西", "西西北", "西北", "北西北"
+      ];
+      const index = Math.round((degrees % 360) / 22.5) % 16;
+      return directions[index] + "风";
+    };
+
+    // 风速转风级（美国Beaufort风级）
+    const getWindPower = (speed) => {
+      if (speed < 1) return "0";
+      if (speed < 2) return "1";
+      if (speed < 3) return "2";
+      if (speed < 5) return "3";
+      if (speed < 8) return "4";
+      if (speed < 11) return "5";
+      if (speed < 14) return "6";
+      if (speed < 17) return "7";
+      if (speed < 21) return "8";
+      if (speed < 24) return "9";
+      if (speed < 28) return "10";
+      if (speed < 33) return "11";
+      return "12";
+    };
+
     return {
       result: {
         city: {
@@ -160,8 +219,8 @@ export const getOtherWeather = async () => {
           day_weather: weatherCodeMap[current.weather_code] || "未知",
           min_degree: current.temperature_2m,
           max_degree: current.temperature_2m,
-          day_wind_direction: current.wind_direction_10m || 0,
-          day_wind_power: Math.round(current.wind_speed_10m / 5) || 0, // 风速转风级
+          day_wind_direction: getWindDirection(current.wind_direction_10m || 0),
+          day_wind_power: getWindPower(current.wind_speed_10m || 0),
         },
       },
     };

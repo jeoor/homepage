@@ -53,45 +53,66 @@ const getTemperature = (min, max) => {
 // 获取天气数据
 const getWeatherData = async () => {
   try {
-    // 获取地理位置信息
-    if (!mainKey) {
-      console.log("未配置，使用备用天气接口");
-      const result = await getOtherWeather();
-      console.log(result);
-      const data = result.result;
-      weatherData.adCode = {
-        city: data.city.City || "未知地区",
-        // adcode: data.city.cityId,
-      };
-      weatherData.weather = {
-        weather: data.condition.day_weather,
-        temperature: getTemperature(data.condition.min_degree, data.condition.max_degree),
-        winddirection: data.condition.day_wind_direction,
-        windpower: data.condition.day_wind_power,
-      };
-    } else {
-      // 获取 Adcode
-      const adCode = await getAdcode(mainKey);
-      console.log(adCode);
-      if (adCode.infocode !== "10000") {
-        throw "地区查询失败";
+    // 如果配置了高德 Key，先尝试高德 API
+    if (mainKey) {
+      try {
+        console.log("尝试获取高德天气数据...");
+        // 获取 Adcode
+        const adCode = await getAdcode(mainKey);
+        console.log("高德 Adcode 响应:", adCode);
+        
+        if (!adCode.infocode || adCode.infocode !== "10000") {
+          throw new Error("高德地区查询失败，降级使用备用API");
+        }
+        
+        weatherData.adCode = {
+          city: adCode.city,
+          adcode: adCode.adcode,
+        };
+        
+        // 获取天气信息
+        const result = await getWeather(mainKey, weatherData.adCode.adcode);
+        console.log("高德天气响应:", result);
+        
+        if (!result.lives || !result.lives[0]) {
+          throw new Error("高德天气数据无效，降级使用备用API");
+        }
+        
+        weatherData.weather = {
+          weather: result.lives[0].weather,
+          temperature: result.lives[0].temperature,
+          winddirection: result.lives[0].winddirection,
+          windpower: result.lives[0].windpower,
+        };
+        return; // 成功，直接返回
+      } catch (error) {
+        console.warn("高德天气 API 失败:", error);
+        // 降级到备用 API
       }
-      weatherData.adCode = {
-        city: adCode.city,
-        adcode: adCode.adcode,
-      };
-      // 获取天气信息
-      const result = await getWeather(mainKey, weatherData.adCode.adcode);
-      weatherData.weather = {
-        weather: result.lives[0].weather,
-        temperature: result.lives[0].temperature,
-        winddirection: result.lives[0].winddirection,
-        windpower: result.lives[0].windpower,
-      };
     }
+
+    // 使用备用 Open-Meteo API
+    console.log("使用备用 Open-Meteo 天气接口");
+    const result = await getOtherWeather();
+    console.log("Open-Meteo 响应:", result);
+    
+    if (!result.result) {
+      throw new Error("天气数据返回格式错误");
+    }
+    
+    const data = result.result;
+    weatherData.adCode = {
+      city: data.city.City || "未知地区",
+    };
+    weatherData.weather = {
+      weather: data.condition.day_weather,
+      temperature: getTemperature(data.condition.min_degree, data.condition.max_degree),
+      winddirection: data.condition.day_wind_direction,
+      windpower: data.condition.day_wind_power,
+    };
   } catch (error) {
-    console.error("天气信息获取失败:" + error);
-    onError("天气信息获取失败");
+    console.error("天气信息获取失败:", error);
+    onError("天气数据获取失败");
   }
 };
 
