@@ -72,50 +72,101 @@ export const getWeather = async (key, city) => {
   return await res.json();
 };
 
-// 获取心知天气 API
-// https://www.seniverse.com/
+// 获取 Open-Meteo 天气 API（无需密钥，支持CORS）
+// https://open-meteo.com/
 export const getOtherWeather = async () => {
-  const key = import.meta.env.VITE_SENIVERSE_KEY;
   try {
-    // 先获取 IP 地址定位
-    const ipRes = await fetch("https://api.seniverse.com/v1/ip", {
-      headers: {
-        "X-Api-Key": key,
-      },
+    console.log("Open-Meteo - 开始获取天气数据...");
+
+    // 先获取用户IP和位置
+    const geoRes = await fetch("https://ipapi.co/json/", {
       credentials: "omit",
     });
-    const ipData = await ipRes.json();
-    const location = ipData.results[0].id; // 获取当地位置 ID
 
-    // 再获取天气数据
-    const weatherRes = await fetch(
-      `https://api.seniverse.com/v1/current.json?location=${location}&ts=0`,
-      {
-        headers: {
-          "X-Api-Key": key,
-        },
-        credentials: "omit",
-      }
-    );
+    if (!geoRes.ok) {
+      throw new Error(`地理位置 API 返回错误: ${geoRes.status}`);
+    }
+
+    const geoData = await geoRes.json();
+    console.log("地理位置数据:", geoData);
+
+    let { latitude, longitude, city } = geoData;
+
+    // 确保坐标是数字类型
+    latitude = parseFloat(latitude);
+    longitude = parseFloat(longitude);
+
+    console.log(`解析后的坐标 - 纬度: ${latitude}, 经度: ${longitude}, 城市: ${city}`);
+
+    if (!latitude || !longitude || isNaN(latitude) || isNaN(longitude)) {
+      throw new Error(`无法获取有效的地理坐标, latitude: ${latitude}, longitude: ${longitude}`);
+    }
+
+    // 获取天气数据
+    const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=auto`;
+    console.log("请求URL:", weatherUrl);
+
+    const weatherRes = await fetch(weatherUrl, {
+      credentials: "omit",
+    });
+
+    if (!weatherRes.ok) {
+      throw new Error(`天气 API 返回错误: ${weatherRes.status}`);
+    }
+
     const weatherData = await weatherRes.json();
-    const result = weatherData.results[0];
+    console.log("天气数据:", weatherData);
+
+    if (!weatherData.current) {
+      throw new Error("天气数据中缺少 current 字段");
+    }
+
+    const current = weatherData.current;
+
+    // 天气代码转换为中文
+    const weatherCodeMap = {
+      0: "晴朗",
+      1: "晴朗",
+      2: "部分多云",
+      3: "多云",
+      45: "雾",
+      48: "结冰雾",
+      51: "毛毛雨",
+      53: "毛毛雨",
+      55: "毛毛雨",
+      61: "小雨",
+      63: "中雨",
+      65: "大雨",
+      71: "小雪",
+      73: "中雪",
+      75: "大雪",
+      77: "雪粒",
+      80: "阵雨",
+      81: "阵雨",
+      82: "暴雨",
+      85: "阵雪",
+      86: "阵雪",
+      95: "雷暴",
+      96: "冰雹雷暴",
+      99: "冰雹雷暴",
+    };
 
     return {
       result: {
         city: {
-          City: result.location.name,
+          City: city || "未知地区",
         },
         condition: {
-          day_weather: result.last_update.text,
-          min_degree: result.last_update.temperature,
-          max_degree: result.last_update.temperature,
-          day_wind_direction: result.last_update.wind_direction,
-          day_wind_power: result.last_update.windpower,
+          day_weather: weatherCodeMap[current.weather_code] || "未知",
+          min_degree: current.temperature_2m,
+          max_degree: current.temperature_2m,
+          day_wind_direction: current.wind_direction_10m || 0,
+          day_wind_power: Math.round(current.wind_speed_10m / 5) || 0, // 风速转风级
         },
       },
     };
   } catch (error) {
-    console.error("心知天气 API 调用失败:", error);
+    console.error("Open-Meteo API 调用失败:", error);
     throw error;
   }
 };
