@@ -18,7 +18,7 @@
 </template>
 
 <script setup>
-import { getAdcode, getWeather, getOtherWeather } from "@/api";
+import { getAdcode, getWeather } from "@/api";
 import { Error } from "@icon-park/vue-next";
 
 // 高德开发者 Key
@@ -37,18 +37,6 @@ const weatherData = reactive({
     windpower: null, // 风力级别
   },
 });
-
-// 取出天气平均值
-const getTemperature = (min, max) => {
-  try {
-    // 计算平均值并四舍五入
-    const average = (Number(min) + Number(max)) / 2;
-    return Math.round(average);
-  } catch (error) {
-    console.error("计算温度出现错误：", error);
-    return "NaN";
-  }
-};
 
 // 获取天气数据
 const getWeatherData = async () => {
@@ -86,29 +74,9 @@ const getWeatherData = async () => {
         return; // 成功，直接返回
       } catch (error) {
         console.warn("高德天气 API 失败:", error);
-        // 降级到备用 API
       }
     }
 
-    // 降级方案：Open-Meteo
-    console.log("使用备用 Open-Meteo 天气接口");
-    const result = await getOtherWeather();
-    console.log("Open-Meteo 响应:", result);
-
-    if (!result.result) {
-      throw new Error("天气数据返回格式错误");
-    }
-
-    const data = result.result;
-    weatherData.adCode = {
-      city: data.city.City || "未知地区",
-    };
-    weatherData.weather = {
-      weather: data.condition.day_weather,
-      temperature: getTemperature(data.condition.min_degree, data.condition.max_degree),
-      winddirection: data.condition.day_wind_direction,
-      windpower: data.condition.day_wind_power,
-    };
   } catch (error) {
     console.error("天气信息获取失败:", error);
     onError("天气数据获取失败");
