@@ -7,9 +7,9 @@ export const siteAnthor = "敖苛";
 export const siteKeywords = "敖苛,个人主页, 主页, Kayro, home, homepage";
 export const siteDes = "存活在隐蔽的角落";
 export const siteUrl = "kayro.cn";
-export const siteLogo = "https://cdn.jsdmirror.com/gh/jeoor/img@main/logo/logo.svg";
-export const siteMainLogo = "https://cdn.jsdmirror.com/gh/jeoor/img@main/me/dog.webp";
-export const siteAppleLogo = "https://cdn.jsdmirror.com/gh/jeoor/img@main/logo/logo.png";
+export const siteLogo = "/logo.svg";
+export const siteMainLogo = "/dog.webp";
+export const siteAppleLogo = "/logo.png";
 
 // ===== 简介文本 =====
 export const descHello = "Hello World !";

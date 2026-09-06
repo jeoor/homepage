@@ -49,7 +49,6 @@ import Footer from "@/components/Footer.vue";
 // 按需弹层组件懒加载（非首屏，拆成独立 chunk）
 const Box = defineAsyncComponent(() => import("@/views/Box/index.vue"));
 const MoreSet = defineAsyncComponent(() => import("@/views/MoreSet/index.vue"));
-import cursorInit from "@/utils/cursor.js";
 import config from "@/../package.json";
 
 const store = mainStore();
@@ -82,8 +81,6 @@ watch(
 onMounted(() => {
   // Ensure the loader shows on initial mount (HMR can preserve state).
   store.setImgLoadStatus(false);
-  // 自定义鼠标
-  if (matchMedia("(pointer: fine)").matches) cursorInit();
 
   // // 屏蔽右键
   // document.oncontextmenu = () => {

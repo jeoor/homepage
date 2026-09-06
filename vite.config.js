@@ -2,7 +2,6 @@
 import { defineConfig } from "vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { resolve } from "path";
-import { VitePWA } from "vite-plugin-pwa";
 import vue from "@vitejs/plugin-vue";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
@@ -47,50 +46,6 @@ export default () =>
       }),
       Components({
         resolvers: [ElementPlusResolver()],
-      }),
-      VitePWA({
-        registerType: "autoUpdate",
-        workbox: {
-          skipWaiting: true,
-          clientsClaim: true,
-          runtimeCaching: [
-            {
-              urlPattern: /(.*?)\.(js|css|woff2|woff|ttf)/, // js / css 静态资源缓存
-              handler: "CacheFirst",
-              options: {
-                cacheName: "js-css-cache",
-              },
-            },
-            {
-              urlPattern: /(.*?)\.(png|jpe?g|svg|gif|bmp|psd|tiff|tga|eps)/, // 图片缓存
-              handler: "CacheFirst",
-              options: {
-                cacheName: "image-cache",
-              },
-            },
-          ],
-        },
-        manifest: {
-          name: siteName,
-          short_name: siteName,
-          description: siteDes,
-          display: "standalone",
-          start_url: "/",
-          theme_color: "#424242",
-          background_color: "#424242",
-          icons: [
-            {
-              src: "https://cdn.jsdmirror.com/gh/jeoor/img@main/logo/logo_192.png",
-              sizes: "192x192",
-              type: "image/png",
-            },
-            {
-              src: "https://cdn.jsdmirror.com/gh/jeoor/img@main/logo/logo_512.png",
-              sizes: "512x512",
-              type: "image/png",
-            },
-          ],
-        },
       }),
       viteCompression(),
     ],
