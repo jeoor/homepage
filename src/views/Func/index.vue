@@ -1,27 +1,28 @@
 <template>
   <!-- 功能区域 -->
-  <div :class="store.mobileFuncState ? 'function mobile' : 'function'">
+  <div class="function" :class="{ mobile: store.mobileFuncState }">
     <el-row :gutter="20">
       <el-col :span="12">
         <div class="left">
           <Hitokoto />
-          <Music v-if="playerHasId" />
+          <Music v-if="song.id && (!isMobile || store.mobileFuncState)" />
         </div>
       </el-col>
       <el-col :span="12">
-        <div class="right cards">
-          <div class="time">
+        <div class="right" :class="{ cards: !isMobile }">
+          <div class="time" :class="{ 'mobile-time': isMobile }">
             <div class="date">
               <span>{{ currentTime.year }}&nbsp;年&nbsp;</span>
               <span>{{ currentTime.month }}&nbsp;月&nbsp;</span>
               <span>{{ currentTime.day }}&nbsp;日&nbsp;</span>
-              <span class="sm-hidden">{{ currentTime.weekday }}</span>
+              <span v-if="!isMobile" class="sm-hidden">{{ currentTime.weekday }}</span>
             </div>
             <div class="text">
-              <span> {{ currentTime.hour }}:{{ currentTime.minute }}:{{ currentTime.second }}</span>
+              <span>{{ currentTime.hour }}:{{ currentTime.minute }}:{{ currentTime.second }}</span>
             </div>
           </div>
-          <Weather />
+          <Music v-if="isMobile && !store.mobileFuncState" always-show />
+          <Weather v-if="!isMobile" />
         </div>
       </el-col>
     </el-row>
@@ -38,12 +39,12 @@ import { song } from "@/config";
 
 const store = mainStore();
 
-// 当前时间
-const currentTime = ref({});
-const timeInterval = ref(null);
+// 移动端状态
+const isMobile = computed(() => (store.getInnerWidth ?? window.innerWidth) < 720);
 
-// 播放器 id
-const playerHasId = song.id;
+// 当前时间
+const currentTime = ref(getCurrentTime());
+const timeInterval = ref(null);
 
 // 更新时间
 const updateTimeData = () => {
@@ -51,7 +52,6 @@ const updateTimeData = () => {
 };
 
 onMounted(() => {
-  updateTimeData();
   timeInterval.value = setInterval(updateTimeData, 1000);
 });
 
@@ -119,7 +119,7 @@ onBeforeUnmount(() => {
         text-align: center;
         .date {
           text-overflow: ellipsis;
-          overflow-x: hidden;
+          overflow: hidden;
           white-space: nowrap;
         }
         .text {
@@ -127,6 +127,18 @@ onBeforeUnmount(() => {
           font-size: 3.25rem;
           letter-spacing: 2px;
           font-family: "UnidreamLED";
+        }
+        &.mobile-time {
+          margin-bottom: 16px;
+          .date {
+            line-height: 1.2;
+          }
+          .text {
+            margin-top: 4px;
+            font-size: 2.5rem;
+            line-height: 1;
+            letter-spacing: 3px;
+          }
         }
       }
       .weather {
@@ -136,6 +148,22 @@ onBeforeUnmount(() => {
         overflow-x: hidden;
         white-space: nowrap;
       }
+    }
+  }
+}
+
+@media (max-width: 719.98px) {
+  .function:not(.mobile),
+  .function:not(.mobile) .el-row,
+  .function:not(.mobile) .el-row .right {
+    height: auto;
+  }
+  .function:not(.mobile) .el-row .right {
+    padding: 0;
+    justify-content: flex-start;
+    :deep(.music) {
+      height: 165px;
+      animation: none;
     }
   }
 }

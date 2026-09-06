@@ -4,11 +4,11 @@
     class="music"
     @mouseenter="volumeShow = true"
     @mouseleave="volumeShow = false"
-    v-show="store.musicOpenState"
+    v-show="store.musicOpenState || props.alwaysShow"
   >
     <div class="btns">
       <span @click="openMusicList()">音乐列表</span>
-      <span @click="store.musicOpenState = false">回到一言</span>
+      <span v-if="!props.alwaysShow" @click="store.musicOpenState = false">回到一言</span>
     </div>
     <div class="control">
       <go-start theme="filled" size="30" fill="#efefef" @click="changeMusicIndex(0)" />
@@ -82,6 +82,11 @@ import { mainStore } from "@/store";
 import { song } from "@/config";
 const store = mainStore();
 
+// 常驻显示模式（移动端右列整卡用，不受 musicOpenState 控制，一直显示）
+const props = defineProps({
+  alwaysShow: { type: Boolean, default: false },
+});
+
 // 音量条数据
 const volumeShow = ref(false);
 const volumeNum = ref(store.musicVolume ? store.musicVolume : 0.7);
@@ -117,18 +122,24 @@ const changeMusicIndex = (type) => {
   playerRef.value.changeSong(type);
 };
 
+// 空格键事件
+const handleKeydown = (e) => {
+  if (!store.musicIsOk) {
+    return;
+  }
+  if (e.code == "Space") {
+    changePlayState();
+  }
+};
+
 onMounted(() => {
-  // 空格键事件
-  window.addEventListener("keydown", (e) => {
-    if (!store.musicIsOk) {
-      return ;
-    }
-    if (e.code == "Space") {
-      changePlayState();
-    }
-  });
+  window.addEventListener("keydown", handleKeydown);
   // 挂载方法至 window
   window.$openList = openMusicList;
+});
+
+onBeforeUnmount(() => {
+  window.removeEventListener("keydown", handleKeydown);
 });
 
 // 监听音量变化
@@ -147,6 +158,7 @@ watch(
   height: 100%;
   background: #00000040;
   backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
   border-radius: 6px;
   padding: 20px;
   display: flex;

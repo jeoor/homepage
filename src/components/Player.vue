@@ -205,11 +205,11 @@ defineExpose({ playToggle, changeVolume, changeSong, toggleList });
   width: 80%;
   border-radius: 6px;
   font-family: "HarmonyOS_Regular", sans-serif !important;
+  :deep(.aplayer-pic) {
+    display: none !important;
+  }
   :deep(.aplayer-body) {
     background-color: transparent;
-    .aplayer-pic {
-      display: none;
-    }
     .aplayer-info {
       margin-left: 0;
       background-color: #ffffff40;
