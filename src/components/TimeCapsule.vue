@@ -29,11 +29,12 @@
 import { HourglassFull } from "@icon-park/vue-next";
 import { getTimeCapsule, siteDateStatistics } from "@/utils/getTime.js";
 import { mainStore } from "@/store";
+import { siteStart } from "@/config";
 const store = mainStore();
 
 // 进度条数据
 const timeData = ref(getTimeCapsule());
-const startDate = ref(import.meta.env.VITE_SITE_START);
+const startDate = ref(siteStart);
 const startDateText = ref(null);
 const timeInterval = ref(null);
 

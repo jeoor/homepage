@@ -244,3 +244,26 @@ scrollbar-thumb {
   border-radius: 10px;
   background-color: #eeeeee;
 }
+
+// ===== 移动端体验优化（现代做法） =====
+// 去除移动端点击高亮
+html {
+  -webkit-tap-highlight-color: transparent;
+}
+// 可点击元素消除双击缩放/点击延迟
+a,
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+// 尊重系统“减少动态效果”
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -4,7 +4,7 @@
       v-show="store.imgLoadStatus"
       :src="bgUrl"
       class="bg"
-      alt="cover"
+      alt="个人主页背景壁纸"
       @load="imgLoadComplete"
       @error.once="imgLoadError"
       @animationend="imgAnimationEnd"

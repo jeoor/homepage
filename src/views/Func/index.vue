@@ -34,6 +34,7 @@ import { mainStore } from "@/store";
 import Music from "@/components/Music.vue";
 import Hitokoto from "@/components/Hitokoto.vue";
 import Weather from "@/components/Weather.vue";
+import { song } from "@/config";
 
 const store = mainStore();
 
@@ -42,7 +43,7 @@ const currentTime = ref({});
 const timeInterval = ref(null);
 
 // 播放器 id
-const playerHasId = import.meta.env.VITE_SONG_ID;
+const playerHasId = song.id;
 
 // 更新时间
 const updateTimeData = () => {

@@ -1,13 +1,10 @@
-import { readFileSync, writeFileSync } from "fs";
+import { writeFileSync } from "fs";
 import { resolve, dirname } from "path";
 import { fileURLToPath } from "url";
+import { siteLinks } from "../src/config.ts";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const root = resolve(__dirname, "..");
-
-const siteLinks = JSON.parse(
-  readFileSync(resolve(root, "src/assets/siteLinks.json"), "utf-8")
-);
 
 const today = new Date().toISOString().split("T")[0];
 

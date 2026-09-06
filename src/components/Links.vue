@@ -47,10 +47,11 @@ import {
   faCompass,
   faLaptopCode,
 } from "@fortawesome/free-solid-svg-icons";
+import { faBilibili } from "@fortawesome/free-brands-svg-icons";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Mousewheel } from "swiper/modules";
-import siteLinks from "@/assets/siteLinks.json";
+import { siteLinks } from "@/config";
 
 const store = mainStore();
 
@@ -68,6 +69,7 @@ const siteLinksList = computed(() => {
 const siteIcon = {
   Blog: faBlog,
   Tv: faTv,
+  Bilibili: faBilibili,
   CompactDisc: faCompactDisc,
   Images: faImages,
   Compass: faCompass,

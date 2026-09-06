@@ -1,5 +1,5 @@
 /* eslint-disable no-undef */
-import { defineConfig, loadEnv } from "vite";
+import { defineConfig } from "vite";
 import { ElementPlusResolver } from "unplugin-vue-components/resolvers";
 import { resolve } from "path";
 import { VitePWA } from "vite-plugin-pwa";
@@ -7,11 +7,39 @@ import vue from "@vitejs/plugin-vue";
 import AutoImport from "unplugin-auto-import/vite";
 import Components from "unplugin-vue-components/vite";
 import viteCompression from "vite-plugin-compression";
+import {
+  siteName,
+  siteLogo,
+  siteAppleLogo,
+  siteDes,
+  siteKeywords,
+  siteAnthor,
+} from "./src/config.ts";
+
+// 将 config.ts 中的站点配置注入 index.html 占位符（单一事实源）
+function htmlConfigPlugin() {
+  return {
+    name: "html-config",
+    transformIndexHtml: {
+      order: "pre",
+      handler(html) {
+        return html
+          .replaceAll("%VITE_SITE_NAME%", siteName)
+          .replaceAll("%VITE_SITE_LOGO%", siteLogo)
+          .replaceAll("%VITE_SITE_APPLE_LOGO%", siteAppleLogo)
+          .replaceAll("%VITE_SITE_DES%", siteDes)
+          .replaceAll("%VITE_SITE_KEYWORDS%", siteKeywords)
+          .replaceAll("%VITE_SITE_ANTHOR%", siteAnthor);
+      },
+    },
+  };
+}
 
 // https://vitejs.dev/config/
-export default ({ mode }) =>
+export default () =>
   defineConfig({
     plugins: [
+      htmlConfigPlugin(),
       vue(),
       AutoImport({
         imports: ["vue"],
@@ -43,9 +71,9 @@ export default ({ mode }) =>
           ],
         },
         manifest: {
-          name: loadEnv(mode, process.cwd()).VITE_SITE_NAME,
-          short_name: loadEnv(mode, process.cwd()).VITE_SITE_NAME,
-          description: loadEnv(mode, process.cwd()).VITE_SITE_DES,
+          name: siteName,
+          short_name: siteName,
+          description: siteDes,
           display: "standalone",
           start_url: "/",
           theme_color: "#424242",

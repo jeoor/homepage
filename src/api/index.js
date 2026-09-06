@@ -1,5 +1,5 @@
-// import axios from "axios";
 import fetchJsonp from "fetch-jsonp";
+import { song } from "@/config";
 
 /**
  * 音乐播放器
@@ -8,7 +8,7 @@ import fetchJsonp from "fetch-jsonp";
 // 获取音乐播放列表
 export const getPlayerList = async (server, type, id) => {
   const res = await fetch(
-    `${import.meta.env.VITE_SONG_API}?server=${server}&type=${type}&id=${id}`,
+    `${song.api}?server=${server}&type=${type}&id=${id}`,
   );
   const data = await res.json();
 
@@ -177,13 +177,13 @@ export const getOtherWeather = async () => {
         );
         city = searchGeo?.results?.[0]?.name || city;
       }
-    } catch (error) {
+    } catch {
       city = city || "未知地区";
     }
   }
 
   const weatherData = await getJson(
-    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&timezone=Asia%2FShanghai`,
+    `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current=temperature_2m,weather_code,wind_direction_10m,wind_speed_10m&daily=temperature_2m_max,temperature_2m_min&timezone=Asia%2FShanghai`,
   );
 
   if (!weatherData?.current) {
@@ -191,6 +191,7 @@ export const getOtherWeather = async () => {
   }
 
   const current = weatherData.current;
+  const daily = weatherData.daily || {};
 
   return {
     result: {
@@ -199,8 +200,8 @@ export const getOtherWeather = async () => {
       },
       condition: {
         day_weather: weatherCodeMap[current.weather_code] || "未知",
-        min_degree: current.temperature_2m,
-        max_degree: current.temperature_2m,
+        min_degree: daily.temperature_2m_min?.[0] ?? current.temperature_2m,
+        max_degree: daily.temperature_2m_max?.[0] ?? current.temperature_2m,
         day_wind_direction: getWindDirection(current.wind_direction_10m || 0),
         day_wind_power: getWindPower(current.wind_speed_10m || 0),
       },

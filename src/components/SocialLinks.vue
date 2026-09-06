@@ -7,6 +7,7 @@
         :key="item.name"
         :href="item.url"
         target="_blank"
+        :aria-label="item.name"
         @mouseenter="socialTip = item.tip"
         @mouseleave="socialTip = '通过这里联系我吧'"
       >
@@ -21,7 +22,7 @@
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
 import { faGithub, faBilibili } from "@fortawesome/free-brands-svg-icons";
 import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
-import socialLinks from "@/assets/socialLinks.json";
+import { socialLinks } from "@/config";
 
 const socialIcon = {
   Github: faGithub,

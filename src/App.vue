@@ -21,6 +21,8 @@
         class="menu"
         size="24"
         v-show="!store.backgroundShow"
+        role="button"
+        aria-label="菜单"
         @click="store.mobileOpenState = !store.mobileOpenState"
       >
         <component :is="store.mobileOpenState ? CloseSmall : HamburgerButton" />
@@ -34,6 +36,7 @@
 </template>
 <script setup>
 import { helloInit, checkDays } from "@/utils/getTime.js";
+import { defineAsyncComponent } from "vue";
 import { HamburgerButton, CloseSmall } from "@icon-park/vue-next";
 import { mainStore } from "@/store";
 import { Icon } from "@vicons/utils";
@@ -42,8 +45,10 @@ import MainLeft from "@/views/Main/Left.vue";
 import MainRight from "@/views/Main/Right.vue";
 import Background from "@/components/Background.vue";
 import Footer from "@/components/Footer.vue";
-import Box from "@/views/Box/index.vue";
-import MoreSet from "@/views/MoreSet/index.vue";
+
+// 按需弹层组件懒加载（非首屏，拆成独立 chunk）
+const Box = defineAsyncComponent(() => import("@/views/Box/index.vue"));
+const MoreSet = defineAsyncComponent(() => import("@/views/MoreSet/index.vue"));
 import cursorInit from "@/utils/cursor.js";
 import config from "@/../package.json";
 
@@ -78,7 +83,7 @@ onMounted(() => {
   // Ensure the loader shows on initial mount (HMR can preserve state).
   store.setImgLoadStatus(false);
   // 自定义鼠标
-  cursorInit();
+  if (matchMedia("(pointer: fine)").matches) cursorInit();
 
   // // 屏蔽右键
   // document.oncontextmenu = () => {

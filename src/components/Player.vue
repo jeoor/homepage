@@ -176,7 +176,7 @@ const toggleList = () => {
 
 // 加载音频错误
 const loadMusicError = () => {
-  let notice = "";
+  let notice;
   if (playList.value.length > 1) {
     notice = "播放歌曲出现错误，播放器将在 2s 后进行下一首";
   } else {

@@ -42,24 +42,14 @@
 import { MusicOne } from "@icon-park/vue-next";
 import { mainStore } from "@/store";
 import config from "@/../package.json";
+import { siteIcp, sitePublicSecurity, siteMengIcp, siteAnthor, siteUrl as siteUrlC } from "@/config";
 
 const store = mainStore();
 const fullYear = new Date().getFullYear();
 
-// 加载配置数据
-const siteStartDate = ref(import.meta.env.VITE_SITE_START);
-const siteStartYear = computed(() => {
-  if (siteStartDate.value?.length >= 4) {
-    return parseInt(siteStartDate.value.substring(0, 4));
-  }
-  return fullYear;
-});
-const siteIcp = ref(import.meta.env.VITE_SITE_ICP);
-const sitePublicSecurity = ref(import.meta.env.VITE_SITE_PUBLIC_SECURITY);
-const siteMengIcp = ref(import.meta.env.VITE_SITE_MENG_ICP);
-const siteAnthor = ref(import.meta.env.VITE_SITE_ANTHOR);
+// 站点链接
 const siteUrl = computed(() => {
-  const url = import.meta.env.VITE_SITE_URL;
+  const url = siteUrlC;
   if (!url) return "https://www.imsyy.top";
   // 判断协议前缀
   if (!url.startsWith("http://") && !url.startsWith("https://")) {
