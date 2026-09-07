@@ -31,7 +31,7 @@ export const song = {
   id: "12607574027",
 };
 
-// ===== 站点链接（原 src/assets/siteLinks.json） =====
+// ===== 站点链接 =====
 // 高德 Key 不走这里，由 Weather.vue 从 import.meta.env.VITE_WEATHER_KEY 读取（平台环境变量）
 export const siteLinks = [
   { icon: "Blog", name: "博客", link: "https://blog.kayro.cn/" },
@@ -42,7 +42,7 @@ export const siteLinks = [
   { icon: "LaptopCode", name: "站点监测", link: "https://status.kayro.cn/" },
 ];
 
-// ===== 社交链接（原 src/assets/socialLinks.json） =====
+// ===== 社交链接 =====
 export const socialLinks = [
   {
     name: "Github",
