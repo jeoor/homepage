@@ -25,7 +25,7 @@
               :style="index < 3 ? 'margin-bottom: 20px' : null"
               @click="jumpLink(item)"
             >
-              <FontAwesomeIcon class="site-icon" :icon="siteIcon[item.icon] || faLink" />
+              <FontAwesomeIcon class="site-icon" :icon="getSiteIcon(item.icon)" />
               <span class="name text-hidden">{{ item.name }}</span>
             </div>
           </el-col>
@@ -38,20 +38,11 @@
 
 <script setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import {
-  faLink,
-  faBlog,
-  faTv,
-  faCompactDisc,
-  faImages,
-  faCompass,
-  faLaptopCode,
-} from "@fortawesome/free-solid-svg-icons";
-import { faBilibili } from "@fortawesome/free-brands-svg-icons";
 import { mainStore } from "@/store";
 import { Swiper, SwiperSlide } from "swiper/vue";
 import { Pagination, Mousewheel } from "swiper/modules";
 import { siteLinks } from "@/config";
+import { getSiteIcon } from "@/config/icons";
 
 const store = mainStore();
 
@@ -64,17 +55,6 @@ const siteLinksList = computed(() => {
   }
   return result;
 });
-
-// 网站链接图标
-const siteIcon = {
-  Blog: faBlog,
-  Tv: faTv,
-  Bilibili: faBilibili,
-  CompactDisc: faCompactDisc,
-  Images: faImages,
-  Compass: faCompass,
-  LaptopCode: faLaptopCode,
-};
 
 // 链接跳转
 const jumpLink = (data) => {

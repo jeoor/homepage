@@ -11,7 +11,7 @@
         @mouseenter="socialTip = item.tip"
         @mouseleave="socialTip = '通过这里联系我吧'"
       >
-        <FontAwesomeIcon class="icon" :icon="socialIcon[item.icon] || faGithub" />
+        <FontAwesomeIcon class="icon" :icon="getSiteIcon(item.icon, faGithub)" />
       </a>
     </div>
     <span class="tip">{{ socialTip }}</span>
@@ -20,16 +20,9 @@
 
 <script setup>
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";
-import { faGithub, faBilibili } from "@fortawesome/free-brands-svg-icons";
-import { faEnvelope } from "@fortawesome/free-solid-svg-icons";
+import { faGithub } from "@fortawesome/free-brands-svg-icons";
 import { socialLinks } from "@/config";
-
-const socialIcon = {
-  Github: faGithub,
-  Bilibili: faBilibili,
-  Envelope: faEnvelope,
-  Tv: faBilibili,
-};
+import { getSiteIcon } from "@/config/icons";
 
 // 社交链接提示
 const socialTip = ref("通过这里联系我吧");
