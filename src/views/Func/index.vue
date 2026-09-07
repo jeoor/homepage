@@ -5,7 +5,7 @@
       <el-col :span="12">
         <div class="left">
           <Hitokoto />
-          <Music v-if="song.id && (!isMobile || store.mobileFuncState)" />
+          <Music v-if="song.id" :always-show="isMobile && !store.mobileFuncState" />
         </div>
       </el-col>
       <el-col :span="12">
@@ -21,7 +21,6 @@
               <span>{{ currentTime.hour }}:{{ currentTime.minute }}:{{ currentTime.second }}</span>
             </div>
           </div>
-          <Music v-if="isMobile && !store.mobileFuncState" always-show />
           <Weather v-if="!isMobile" />
         </div>
       </el-col>
@@ -153,17 +152,38 @@ onBeforeUnmount(() => {
 }
 
 @media (max-width: 719.98px) {
-  .function:not(.mobile),
-  .function:not(.mobile) .el-row,
-  .function:not(.mobile) .el-row .right {
+  .function:not(.mobile) {
     height: auto;
-  }
-  .function:not(.mobile) .el-row .right {
-    padding: 0;
-    justify-content: flex-start;
-    :deep(.music) {
-      height: 165px;
-      animation: none;
+    .el-row {
+      height: auto;
+      flex-direction: column;
+      .el-col {
+        &:nth-of-type(1),
+        &:nth-of-type(2) {
+          display: contents;
+        }
+      }
+      .left,
+      .right {
+        display: contents;
+      }
+      .left {
+        :deep(.hitokoto) {
+          display: none !important;
+        }
+        :deep(.music) {
+          order: 2;
+          height: 165px;
+          animation: none;
+        }
+      }
+      .right {
+        animation: none;
+        .time {
+          order: 1;
+          width: 100%;
+        }
+      }
     }
   }
 }

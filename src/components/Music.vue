@@ -140,6 +140,9 @@ onMounted(() => {
 
 onBeforeUnmount(() => {
   window.removeEventListener("keydown", handleKeydown);
+  if (window.$openList === openMusicList) {
+    delete window.$openList;
+  }
 });
 
 // 监听音量变化
