@@ -9,6 +9,14 @@ import {
   faCompass,
   faLaptopCode,
   faEnvelope,
+  faCakeCandles,
+  faBirthdayCake,
+  faStopwatch,
+  faHourglassEnd,
+  faHourglassHalf,
+  faGift,
+  faClock,
+  faCalendarDays,
 } from "@fortawesome/free-solid-svg-icons";
 import {
   faGithub,
@@ -33,6 +41,15 @@ const siteIcon = {
   Compass: faCompass,
   LaptopCode: faLaptopCode,
   Envelope: faEnvelope,
+  // 生日 / 倒计时
+  CakeCandles: faCakeCandles,
+  BirthdayCake: faBirthdayCake,
+  Stopwatch: faStopwatch,
+  HourglassEnd: faHourglassEnd,
+  Hourglass: faHourglassHalf,
+  Gift: faGift,
+  Clock: faClock,
+  CalendarDays: faCalendarDays,
   // 平台
   Github: faGithub,
   Bilibili: faBilibili,
