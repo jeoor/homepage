@@ -35,7 +35,7 @@ export const song = {
 // 高德 Key 不走这里，由 Weather.vue 从 import.meta.env.VITE_WEATHER_KEY 读取（平台环境变量）
 export const siteLinks = [
   { icon: "Blog", name: "博客", link: "https://blog.kayro.cn/" },
-  { icon: "Bilibili", name: "B 站主页", link: "https://space.bilibili.com/513671572" },
+  { icon: "HourglassEnd", name: "生日倒计时", link: "https://hbd.kayro.cn/" },
   { icon: "CompactDisc", name: "音乐", link: "https://music.kayro.cn/" },
   { icon: "Images", name: "相册", link: "https://gallery.kayro.cn/" },
   { icon: "Compass", name: "有趣的东西", link: "https://fun.kayro.cn/" },
